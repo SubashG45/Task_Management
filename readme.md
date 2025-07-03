@@ -29,7 +29,7 @@
     - with docker
         run compose-docker up --build
 
-## How to run backend 
+## How to run frontend 
     first you have to go to backend folder cd frontend/
     - without docker
         you can install npm by npm i --legacy-peer-deps and run npm run dev
