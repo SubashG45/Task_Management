@@ -24,6 +24,19 @@
 
 ## How to run backend 
     first you have to go to backend folder cd backend/
+
+    end points
+    http://localhost:3001/api/auth/register (POST method)
+    http://localhost:3001/api/auth/register  (POST method)
+    http://localhost:3001/api/tasks (POST method)
+    http://localhost:3001/api/tasks (GET method)
+    http://localhost:3001/api/tasks/:id( DELETE method)
+    http://localhost:3001/api/tasks/:id (PUT method)    
+    http://localhost:3001/api/tasks/export/csv (GET method)
+    
+    
+    
+
     - without docker 
         you can install npm by npm i and run by npm run dev
     - with docker
