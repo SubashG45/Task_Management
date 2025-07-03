@@ -31,6 +31,13 @@
 
 ## How to run frontend 
     first you have to go to backend folder cd frontend/
+
+    end points
+    http://localhost:3000/auth/register
+    http://localhost:3000/auth/register   
+    http://localhost:3000/dashboard
+    
+
     - without docker
         you can install npm by npm i --legacy-peer-deps and run npm run dev
     -with docker
