@@ -35,8 +35,14 @@ export async function apiCall(endpoint: string, options: RequestInit = {}) {
 
     throw new Error(errorMessage)
   }
+  const contentType = response.headers.get("Content-Type") || ""
 
-  return response.json()
+  if (contentType.includes("application/json")) {
+    return response.json()
+  }
+
+  // Handle non-JSON responses like CSV or files
+  return response.blob()
 }
 
 export const authAPI = {
@@ -55,7 +61,7 @@ export const authAPI = {
         const errorData = await response.json()
         errorMessage = errorData.message || errorData.error || errorMessage
       } catch (e) {
-        // If response is not JSON, use the default message
+        console.log("error");
       }
       throw new Error(errorMessage)
     }
@@ -85,7 +91,7 @@ export const authAPI = {
       const errorData = await response.json()
       errorMessage = errorData.message || errorData.error || errorMessage
     } catch (e) {
-      console.log("Could not parse error response as JSON") 
+      console.log("Could not parse error response as JSON")
     }
     throw new Error(errorMessage)
   },

@@ -33,4 +33,10 @@ export const taskAPI = {
       body: JSON.stringify({ status }),
     })
   },
+
+  downloadCsv: async (): Promise<void> => {
+    return apiCall(`/tasks/export/csv`, {
+      method: "GET",
+    })
+  },
 }

@@ -51,39 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      console.log("Attempting login for:", email) // Debug log
       const data = await authAPI.login(email, password)
-      console.log("Login response:", data) // Debug log
-
-      // Store the token and user data from your API response
-      localStorage.setItem("token", data.token)
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          id: data.user.id,
-          username: data.user.username,
-          email: email, // Store the login email since API doesn't return it
-        }),
-      )
-
-      setUser({
-        id: data.user.id,
-        username: data.user.username,
-        email: email,
-      })
-
-      return true
-    } catch (error) {
-      console.error("Login error:", error)
-      return false
-    }
-  }
-
-  const register = async (username: string, email: string, password: string): Promise<boolean> => {
-    try {
-      console.log("Attempting registration for:", { username, email }) // Debug log
-      const data = await authAPI.register(username, email, password)
-      console.log("Registration response in auth provider:", data) // Debug log
 
       // Store the token and user data from your API response
       localStorage.setItem("token", data.token)
@@ -102,7 +70,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         email: email,
       })
 
-      console.log("Registration successful, user set") // Debug log
+      return true
+    } catch (error) {
+      console.error("Login error:", error)
+      return false
+    }
+  }
+
+  const register = async (username: string, email: string, password: string): Promise<boolean> => {
+    try {
+      const data = await authAPI.register(username, email, password)
+      // Store the token and user data from your API response
+      localStorage.setItem("token", data.token)
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          id: data.user.id,
+          username: data.user.username,
+          email: email,
+        }),
+      )
+
+      setUser({
+        id: data.user.id,
+        username: data.user.username,
+        email: email,
+      })
+
       return true
     } catch (error) {
       console.error("Registration error in auth provider:", error)

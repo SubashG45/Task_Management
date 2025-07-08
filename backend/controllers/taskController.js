@@ -1,5 +1,6 @@
 const Task = require('../models/Tasks');
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
+const { Parser } = require('json2csv');
 
 // Create task
 exports.createTask = async (req, res) => {
@@ -65,22 +66,27 @@ exports.deleteTask = async (req, res) => {
 // Export to CSV
 exports.exportTasks = async (req, res) => {
   try {
-    const tasks = await Task.find({ userId: req.user.id });
+    // Fetch user's tasks
+    const tasks = await Task.find({ userId: req.user.id }).lean(); // lean() for plain objects
 
-    const csvWriter = createCsvWriter({
-      path: 'tasks.csv',
-      header: [
-        { id: 'title', title: 'Title' },
-        { id: 'description', title: 'Description' },
-        { id: 'priority', title: 'Priority' },
-        { id: 'dueDate', title: 'Due Date' },
-        { id: 'completed', title: 'Completed' }
-      ]
-    });
+    if (!tasks || tasks.length === 0) {
+      return res.status(404).json({ message: 'No tasks found to export.' });
+    }
 
-    await csvWriter.writeRecords(tasks);
-    res.download('tasks.csv');
+    // Define CSV fields
+    const fields = ['title', 'description', 'priority', 'dueDate', 'completed'];
+    const opts = { fields };
+
+    // Convert to CSV string
+    const parser = new Parser(opts);
+    const csv = parser.parse(tasks);
+
+    // Send CSV as a downloadable file
+    res.header('Content-Type', 'text/csv');
+    res.header('Content-Disposition', 'attachment; filename=tasks.csv');
+    res.status(200).send(csv);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Error exporting tasks:', err);
+    res.status(500).json({ error: 'Failed to export tasks' });
   }
 };

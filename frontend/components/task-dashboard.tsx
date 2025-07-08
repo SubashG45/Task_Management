@@ -11,9 +11,10 @@ import { TaskCard } from "@/components/task-card"
 import { useToast } from "@/hooks/use-toast"
 import { Plus, Search, Download, LogOut, User, RefreshCw } from "lucide-react"
 import { taskAPI } from "@/lib/task-api"
+import { apiCall } from "@/lib/api"
 
 export interface Task {
-  _id?: string 
+  _id?: string
   title: string
   description: string
   priority: "low" | "medium" | "high"
@@ -23,7 +24,7 @@ export interface Task {
   createdAt: string
   updatedAt?: string
   userId: string
-  __v?: number 
+  __v?: number
 }
 
 // Helper function to normalize task data from API
@@ -128,7 +129,6 @@ export function TaskDashboard() {
     if (!editingTask) return
 
     try {
-      // Use _id for API call if available, otherwise use id
       const taskId = editingTask._id;
       const apiTask = await taskAPI.updateTask(taskId, taskData)
       const normalizedTask = normalizeTask(apiTask)
@@ -202,35 +202,62 @@ export function TaskDashboard() {
     }
   }
 
-  const exportToCSV = () => {
-    const csvContent = [
-      ["Title", "Description", "Priority", "Status", "Due Date", "Created At", "Updated At"],
-      ...filteredTasks.map((task) => [
-        task.title,
-        task.description,
-        task.priority,
-        task.status,
-        new Date(task.dueDate).toLocaleDateString(),
-        new Date(task.createdAt).toLocaleDateString(),
-        task.updatedAt ? new Date(task.updatedAt).toLocaleDateString() : "",
-      ]),
-    ]
-      .map((row) => row.map((field) => `"${field}"`).join(","))
-      .join("\n")
+  // const exportToCSV = () => {
+  //   const csvContent = [
+  //     ["Title", "Description", "Priority", "Status", "Due Date", "Created At", "Updated At"],
+  //     ...filteredTasks.map((task) => [
+  //       task.title,
+  //       task.description,
+  //       task.priority,
+  //       task.status,
+  //       new Date(task.dueDate).toLocaleDateString(),
+  //       new Date(task.createdAt).toLocaleDateString(),
+  //       task.updatedAt ? new Date(task.updatedAt).toLocaleDateString() : "",
+  //     ]),
+  //   ]
+  //     .map((row) => row.map((field) => `"${field}"`).join(","))
+  //     .join("\n")
 
-    const blob = new Blob([csvContent], { type: "text/csv" })
-    const url = window.URL.createObjectURL(blob)
-    const a = document.createElement("a")
-    a.href = url
-    a.download = "tasks.csv"
-    a.click()
-    window.URL.revokeObjectURL(url)
+  //   const blob = new Blob([csvContent], { type: "text/csv" })
+  //   const url = window.URL.createObjectURL(blob)
+  //   const a = document.createElement("a")
+  //   a.href = url
+  //   a.download = "tasks.csv"
+  //   a.click()
+  //   window.URL.revokeObjectURL(url)
 
-    toast({
-      title: "Export successful",
-      description: "Your tasks have been exported to CSV.",
-    })
-  }
+  //   toast({
+  //     title: "Export successful",
+  //     description: "Your tasks have been exported to CSV.",
+  //   })
+  // }
+
+
+  const exportToCSV = async () => {
+    try {
+      const blob = await taskAPI.downloadCsv();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'tasks.csv';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      toast({
+        title: "Export successful",
+        description: "Your tasks have been exported to CSV.",
+      });
+    } catch (error) {
+      toast({
+        title: "Export failed",
+        description: "Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
 
   const completedTasks = tasks.filter((task) => task.status === "completed").length
   const pendingTasks = tasks.filter((task) => task.status === "pending").length
